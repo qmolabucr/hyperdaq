@@ -1,0 +1,9 @@
+*.pyc
+__pycache__
+*.txt
+*.dat
+parameters.py
+experimental_parameters.txt
+desktop.ini
+docs/*
+!docs/.gitkeep 
