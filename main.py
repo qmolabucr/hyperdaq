@@ -1,25 +1,15 @@
 '''
-hyperDAQ : Hypercubic Data Acquisition Program
-
 main.py
 
-A file for defining the main User Inferface and main thread of the program
+A module for defining the main User Inferface and main thread of the program
 
 Last Updated: January 2020
 
-Trevor Arp
-University of California, Riverside
+|  Trevor Arp
+|  Gabor Lab
+|  University of California, Riverside
+
 All Rights Reserved
-
-This file also contains the primary documentation for the overall program, other modules contain
-more specialized comments but the overall structure should be clear from the documentation in this
-module.
-
-Threading Structure:
-- Devices and other modules can operate in seperate threads as needed but are controlled by the main
-thread, which is managed by the user interface. Actions (such as performing a scan or moving a Stage)
-are performed in threads spawned off the main thread by the multiprocessing module
-
 '''
 import tkinter as tk
 import tkinter.messagebox as mb
@@ -44,14 +34,16 @@ from hyperdaq.card import CAL
 class Scan_Spec():
     '''
     A specification for a given scan, passed to the control thread for processing.
+
     Meant to be extensible to allow for increased functionality in the future.
 
     The critical parameter is Scan_Spec.dimensions, a list containing the specifications for each
-    dimension, the index determines the order of the variables. Each specification is a list with
-    the following entries:
+    dimension, the index determines the order of the variables.
+
+    Each specification is a list with the following entries:
     [variable_identifier, start_value, end_value, number_of_points, sampling_function]
-    where the sampling function is numpy.linspace by default i.e. numpy.linspace(start_value, end_value, number_of_points)
-    Non-linear sampling may be introduced in the future, not currently implemented
+    where the sampling function is numpy.linspace by default i.e. numpy.linspace(start_value,
+    end_value, number_of_points)
     '''
 
     def __init__(self):
@@ -67,6 +59,10 @@ class Scan_Spec():
     def add_constant(self, parameter, value):
         '''
         Adds a scanning parameter that will be held constant during the scan.
+
+        Args:
+            parameter (str): the parameter to hold constant
+            value (float): the value to hold it at
         '''
         if parameter in self.constants.keys() or parameter in self.scanvars:
             print("Warning parameter: " + str(parameter) + ' already in scan spec, nothing updated')

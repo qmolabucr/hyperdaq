@@ -5,10 +5,12 @@ Optimized hyperDAQ modules for talking to National Instruments Data Acquisition 
 
 Replacing nidaq.py and controls.py
 
-Last updated: January 2020 by Trevor Arp
+Last Updated: January 2020
 
-Gabor Lab
-University of California, Riverside
+|  Trevor Arp
+|  Gabor Lab
+|  University of California, Riverside
+
 All Rights Reserved
 '''
 

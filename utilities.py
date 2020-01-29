@@ -1,13 +1,14 @@
 '''
-
 utilities.py
 
-hyperDAQ utilities
+Various useful functions for hyperDAQ
 
-Last updated: January 2020 by Trevor Arp
+Last Updated: January 2020
 
-Gabor Lab
-University of California, Riverside
+|  Trevor Arp
+|  Gabor Lab
+|  University of California, Riverside
+
 All Rights Reserved
 '''
 import parameters as pm

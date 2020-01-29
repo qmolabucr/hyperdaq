@@ -3,10 +3,12 @@ processing.py
 
 hyperDAQ module for processing incoming data
 
-Last updated: January 2020 by Trevor Arp
+Last Updated: January 2020
 
-Gabor Lab
-University of California, Riverside
+|  Trevor Arp
+|  Gabor Lab
+|  University of California, Riverside
+
 All Rights Reserved
 '''
 

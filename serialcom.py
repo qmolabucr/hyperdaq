@@ -3,10 +3,12 @@ serialcom.py
 
 GaborDAQ functions for communicating with equipment via serial
 
-Last updated: November 2014 by Trevor Arp
+Last Updated: January 2020
 
-Gabor Lab
-University of California, Riverside
+|  Trevor Arp
+|  Gabor Lab
+|  University of California, Riverside
+
 All Rights Reserved
 '''
 

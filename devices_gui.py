@@ -5,10 +5,12 @@ devices_gui.py
 
 A module for user interfaces of hardware devices controlled through hyperDAQ
 
-Last Updated: June 2018
+Last Updated: January 2020
 
-Trevor Arp
-University of California, Riverside
+|  Trevor Arp
+|  Gabor Lab
+|  University of California, Riverside
+
 All Rights Reserved
 '''
 import tkinter as tk

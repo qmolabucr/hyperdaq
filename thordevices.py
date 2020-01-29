@@ -4,10 +4,12 @@ thordevices.py
 Controlls devices from Thorlabs using the Thorlabs.MotionControl.C_API DLLs that go with
 the Thorlabs kinesis software.
 
-Last updated: January 2020 by Trevor Arp
+Last Updated: January 2020
 
-Gabor Lab
-University of California, Riverside
+|  Trevor Arp
+|  Gabor Lab
+|  University of California, Riverside
+
 All Rights Reserved
 '''
 import parameters as pm
