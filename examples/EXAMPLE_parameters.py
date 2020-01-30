@@ -4,26 +4,28 @@
 ####################################
 Change based on Calibration Data
 '''
+# Scanning calibration to convert voltage to physical space
+# Usually calibrating scanning galvos mirros.
+SCAN_units_to_volts = 1.0/1.0 # V/um Conversion factor
+SCAN_units = "Volts" # "Micron"
 
-# Delay Stage Calibration
-DELAY_mm_to_ps = 6.673 # ps/mm
-DELAY_center_position = 107.506 #107.473 #108.125 # mm +/- 0.01
-
-# Galvos Calibration
-# From fitting 40um Hall Bars: 84.0 +/- 2.3 micron/Volt
-SCAN_units_to_volts = 1.0/84.0 # V/um Conversion factor
-SCAN_units = "Micron" #"Volts"
-
-# Calibration for the voltage channels
-# Key is the channel identifier
+# Calibration for the voltage channels accounting for any electronics between the card
+# and the sample/experiment. These exist so that the values displayed on the GUI are
+# the real values applied to the sample
+# A dictionary where Key is the channel identifier
 # Values are (multipiler, offset)
 # multiplier : V(card)/V(Output of electionics)
 CHANNEL_calibration = {
     'xaxis':(1.0,0.0),
     'yaxis':(1.0,0.0),
-    'vsd':(11.088,0.0), # With voltage divider, check sign
-    'vbg':(1.0, 0.0) # No amplifier
+    'vsd':(1.0, 0.0),
+    'vbg':(1.0, 0.0)
     }
+
+## Example of calibration parameters for the Thor Labs device defined in EXAMPLE_hyperdaq
+## Delay Stage Calibration
+# DELAY_mm_to_ps = 6.673 # ps/mm
+# DELAY_center_position = 107.506 #107.473 #108.125 # mm +/- 0.01
 
 '''
 ####################################
@@ -31,41 +33,24 @@ CHANNEL_calibration = {
 ####################################
 '''
 
-COM_magnet = "COM8"
-COM_tempcontrol = "COM5"
-COM_OPO = "COM4"
+##
+## Example of hardware parameters for the example devices defined in EXAMPLE_hyperdaq
+##
 
-# OPO Parameters
-OPO_min_wavelength = 1120 #nm
-OPO_max_wavelength = 1525 #nm
+## Example Hardware: ThorLabs Delay Stage
+# DLL_Thorlabs = "C:\Program Files\Thorlabs\Kinesis" # Thor Labs code DLL
+# SERIAL_delay = 73852417 # The serial number of the delay stage
+# DELAY_min_mm = 0.0
+# DELAY_max_mm = 220.0
+# DELAY_min_ps = (DELAY_center_position - DELAY_max_mm)*DELAY_mm_to_ps
+# DELAY_max_ps = (DELAY_center_position - DELAY_min_mm)*DELAY_mm_to_ps
+# DELAY_step_to_mm = 2.0/0.0001 # step/mm
+# DELAY_vel_to_mm = 1237/100.0 # Device Units per mm/s
+# DELAY_default_accel = 13421772 # Device units
 
-#Delay Stage Parameters
-SERIAL_delay = 73852417
-DELAY_min_mm = 0.0
-DELAY_max_mm = 220.0
-DELAY_min_ps = (DELAY_center_position - DELAY_max_mm)*DELAY_mm_to_ps
-DELAY_max_ps = (DELAY_center_position - DELAY_min_mm)*DELAY_mm_to_ps
-DELAY_step_to_mm = 2.0/0.0001 # step/mm
-DELAY_vel_to_mm = 1237/100.0 # Device Units per mm/s
-DELAY_default_accel = 13421772 # Device units
-
-# Rotation Stage Parameters
-SERIAL_rotation_delay = 55000079
-SERIAL_rotation_refer = 55000642
-SERIAL_rotation_polar = 55000677
-
-ROTATION_step_to_deg = 136533.33
-ROTATION_min_angle = 0.0
-ROTATION_max_angle = 360.0
-
-BEAM_default_ratio = 1.0
-BEAM_max_ratio = 5.0
-BEAM_min_ratio = 0.1
-
-POLARIZATION_default_angle = 121.5
-
-# Heater Parameters
-MAX_heater_temp = 420.0 # Kelvin
+## Example Hardware: Lakeshore Temperature controller
+# COM_tempcontrol = "COM5" # The COM address of the serial port
+# MAX_heater_temp = 420.0 # Kelvin
 
 '''
 ####################################
@@ -73,40 +58,63 @@ MAX_heater_temp = 420.0 # Kelvin
 ####################################
 Change based on system, should only be changed infrequently
 '''
-SYSTEM_prefix = "CPS" # Identifier for the all the files taken by this system
+# Identifier for the all the files taken by this system, should be uniform across everything
+# Related to this experimental system
+SYSTEM_prefix = "CPS"
 
-# Excluded Axes
-EXCLUDE_fast = ['yaxis', 'pol_stage', 'opo_control']
-EXCLUDE_slow = ['xaxis']
-EXCLUDE_third_axis = ['yaxis', 'xaxis']
+# Path to the directory where the raw data is saved, it is often useful to have a file for the raw
+# and processes data in teh same directory, with the same direcotry structures.
+DATA_dir_path = "E:\\Data\\Raw\\"
 
-DATA_dir_path = "E:\\Data\\Raw\\" # Path to data directory
-PARAMS_file = "experimental_parameters.txt"
+# The number of Queues the card controller should fill, needs to correspond to the number of
+# data_images that are processing the data.
+NUM_card_queues = 2
 
-NUM_card_queues = 3
-REF_IMG_index = 0
-POW_IMG_index = 1
+# The NI DAQ card controller returns data for all defined card inputs channels, and passes an array
+# where the columns correspond to different input chanels. These indicies tell the data_images which
+# column index corresponds to input they are tracking. This may change based on the specific NI card.
+RFI_IMG_index = 0
 PCI_IMG_index = 2
+# POW_IMG_index = 1 # Index for example auxiliary image defined in EXAMPLE_hyperdaq
 
-DRIFT_y_min = 0.25 # minimum drift correction
-DRIFT_y_max = 5.0 # maximum drift correction
-
-# Removing the x drift correction for noew
-DRIFT_x_min = 0.5 # minimum drift correction
-DRIFT_x_max = 5.0 # maximum drift correction
-
-# DAQ Card Limits
+# DAQ Card Analog Output Limits, changing them will change the output resolution
 CARD_AO_Max = 10.0
 CARD_AO_Min = -10.0
 CARD_AI_Max = 10.0
 CARD_AI_Min = -10.0
+
+# DAQ card Channel Parameters
+NUM_input_channels = 10
+DEVICE_output = 'Dev1/'
+CHANNEL_input = "Dev1/ai0:7, Dev1/ai16:17"
+CHANNEL_x = 'Dev1/ao0'
+CHANNEL_y = 'Dev1/ao1'
+CHANNEL_vsd = 'Dev1/ao2'
+CHANNEL_vbg = 'Dev1/ao3'
+
+# DAQ card channel Labels
+CLABEL_x = 'ao0'
+CLABEL_y = 'ao1'
+CLABEL_vsd = 'ao2'
+CLABEL_vbg = 'ao3'
+
+# Axes to exclude as options from the fast, slow and additional axes
+EXCLUDE_fast = ['yaxis']
+EXCLUDE_slow = ['xaxis']
+EXCLUDE_third_axis = ['yaxis', 'xaxis']
 
 # Scan save configurations
 NUM_Save_Slots = 12
 SCANS_Save_dir = 'saved'
 
 # How often Serial Devices are polled
-SERIAL_device_poll = 2.0 # 0.25
+SERIAL_device_poll = 1.0
+
+# Drift correction parameters, for if drift correction is enabled
+DRIFT_y_min = 0.25 # minimum drift correction
+DRIFT_y_max = 5.0 # maximum drift correction
+DRIFT_x_min = 0.5 # minimum drift correction
+DRIFT_x_max = 5.0 # maximum drift correction
 
 # Plots Labels
 PLT_image0_title = "Reflection Image"
@@ -116,27 +124,17 @@ PLT_image1_title = "Photocurrent Image"
 PLT_image0_cmap = 'plasma'
 PLT_image1_cmap = 'viridis'
 
+# Plot sizes
+PLT_xsize_inches = 6.85
+PLT_ysize_inches = 5.53
+
 # GUI defaults
 DEFAULT_fastaxis_start = -1.0/SCAN_units_to_volts
 DEFAULT_fastaxis_end = 1.0/SCAN_units_to_volts
 DEFAULT_slowaxis_start = -1.0/SCAN_units_to_volts
 DEFAULT_slowaxis_end = 1.0/SCAN_units_to_volts
 
-# Channel Parameters
-NUM_input_channels = 10
-DEVICE_output = 'Dev1/'
-CHANNEL_input = "Dev1/ai0:7, Dev1/ai16:17"
-CHANNEL_x = 'Dev1/ao0'
-CHANNEL_y = 'Dev1/ao1'
-CHANNEL_vsd = 'Dev1/ao2'
-CHANNEL_vbg = 'Dev1/ao3'
-
-# Channel Labels
-CLABEL_x = 'ao0'
-CLABEL_y = 'ao1'
-CLABEL_vsd = 'ao2'
-CLABEL_vbg = 'ao3'
-
+# Function wait times, cause a delay after a command is sent to a peice of hardware, to give it time to respond
 CNTL_function_wait = 0.1 # Wait after calling a hardware function while scanning
 CNTL_fast_function_wait = 0.1 # Wait after calling a hardware function, with the function on the fast axis
 CNTL_repeat_wait = 0.5 # Wait before repeating (seconds)
@@ -153,6 +151,8 @@ DAQ_name = "hyperDAQ - v2.0"
 # Data Writing Parameters
 DATA_file_ext = "dat" # Data file extension, i.e. filename.ext
 WRITE_delay = 0.25
+
+PARAMS_file = "experimental_parameters.txt" # the experimental parameters file
 
 # Required parameters to run a scan, and what to call them in a log file, if they are not the fast, slow or cube axis
 # Minimum of xaxis, yaxis are required for 2D spatial scanning. Note that outputs in this will be calibrated with
@@ -177,9 +177,7 @@ DEFAULT_spatial_output = 0.0
 # Will automatically write out the fast and slow axes
 SCAN_log_parameters = {}
 
-#Hypercubic parameters
-#DEFAULT_scan_number = 25
-#DEFAULT_repeat_number = 10
+#Default number of scans for a cubic or hypercubic axis
 DEFAULT_number = 10
 
 # Data Acquisition Parameters
@@ -201,18 +199,6 @@ CNTL_default_ramp_time = 0.5
 CNTL_scan_wait = 0.1
 CNTL_zero_time = CNTL_default_ramp_time
 
-RATE_line_scan = 10 #5 #The prime line rate in Hertz
+RATE_max_line_scan = 10.0 # The maximum line rate in Hertz
+RATE_default_line_scan = 2.0 # The default line rate in Hertz
 NUM_to_dequeue = int(IMG_delay_time / CARD_poll_delay)
-
-'''
-####################################
-######## Dummy Parameters ##########
-####################################
-So that this parameters file will work on multiple system scripts
-'''
-DLL_directory = "C:\Program Files\Thorlabs\Kinesis"
-NDFILTER_optical_density = 1
-NDFILTER_angular_range = 1
-PCY_IMG_index = 4
-NANOROTATION_min_angle = 0.0
-NANOROTATION_max_angle = 360.0

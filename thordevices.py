@@ -51,8 +51,8 @@ class DelayController():
         self.position = 0.0
 
         # Load the DLLs
-        self.device_manager = ctypes.CDLL(join(pm.DLL_directory, DLL_device)) #Here to make subsequent modules load
-        self.dll = ctypes.CDLL(join(pm.DLL_directory, DLL_delay))
+        self.device_manager = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_device)) #Here to make subsequent modules load
+        self.dll = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_delay))
 
         # Initialize the device
         self.dll.BMC_Open(self.serial)
@@ -156,8 +156,8 @@ class RotationController():
         self.device_to_deg = pm.ROTATION_step_to_deg
 
         # Load the DLLs
-        self.device_manager = ctypes.CDLL(join(pm.DLL_directory, DLL_device)) #Here to make subsequent modules load
-        self.dll = ctypes.CDLL(join(pm.DLL_directory, DLL_rotation))
+        self.device_manager = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_device)) #Here to make subsequent modules load
+        self.dll = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_rotation))
 
         # Initialize the device
 
@@ -259,8 +259,8 @@ class DualRotationController():
         self.angleR = 0.0
 
         # Load the DLLs
-        self.device_manager = ctypes.CDLL(join(pm.DLL_directory, DLL_device)) #Here to make subsequent modules load
-        self.dll = ctypes.CDLL(join(pm.DLL_directory, DLL_rotation))
+        self.device_manager = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_device)) #Here to make subsequent modules load
+        self.dll = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_rotation))
 
         # Initialize the device
         self.dll.TLI_BuildDeviceList() # Somehow allows it to find the device
@@ -371,8 +371,8 @@ class BSCRotationController():
         self.device_to_deg = pm.ROTATION_NanoRotator_step_to_deg
 
         # Load the DLLs
-        self.device_manager = ctypes.CDLL(join(pm.DLL_directory, DLL_device)) #Here to make subsequent modules load
-        self.dll = ctypes.CDLL(join(pm.DLL_directory, DLL_BSC))
+        self.device_manager = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_device)) #Here to make subsequent modules load
+        self.dll = ctypes.CDLL(join(pm.DLL_Thorlabs, DLL_BSC))
 
         # Initialize the device
 

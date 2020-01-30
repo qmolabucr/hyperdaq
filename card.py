@@ -72,9 +72,6 @@ class card_control_acquire():
     $V_bg_chan is the channel name for the backgate (e.g. "ao3")
     at the beginning of a scan it synchronizes with the Scanner's own stopwatch
 
-    Will scan at the rate defined by RATE_line_scan unless otherwise specified using the
-    set_line_rate function
-
     Callable Attributes:
     $nx is the number of x points in the image, by default NUM_x_points
     $ny is the number of y points in the image, by default NUM_y_points
@@ -146,7 +143,7 @@ class card_control_acquire():
         nidaq.DAQmxCreateAOVoltageChan(self.AOtask, self.chanS, "", pm.CARD_AO_Min, pm.CARD_AO_Max, DAQmx_Val_Volts, None)
         nidaq.DAQmxCreateAOVoltageChan(self.AOtask, self.chanB, "", pm.CARD_AO_Min, pm.CARD_AO_Max, DAQmx_Val_Volts, None)
 
-        self.set_line_rate(pm.RATE_line_scan)
+        self.set_line_rate(pm.RATE_default_line_scan)
 
         # Zero channels Initially
         self.zero_all()
@@ -190,7 +187,7 @@ class card_control_acquire():
         '''
         Sets the line rate
         '''
-        if float(rate) <= pm.RATE_line_scan:
+        if float(rate) <= pm.RATE_max_line_scan:
             self.linerate = float(rate)
 
             # Fix Memory error for slow scans
@@ -213,7 +210,7 @@ class card_control_acquire():
             self.bix2 = self.bix1 + self.points
             nidaq.DAQmxCfgSampClkTiming(self.AOtask, self.clockSource, float64(self.sampleFreq), DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, self.samplesPerChan)
         else:
-            print("Error card.card_control : Cannot set line rate faster than parameter RATE_line_scan=" + str(pm.RATE_line_scan))
+            print("Error card.card_control : Cannot set line rate faster than parameter RATE_max_line_scan=" + str(pm.RATE_max_line_scan))
 	# end set_line_rate
 
     def ramp_up(self, X, Y, Vsd, Vbg, t=-1):

@@ -1310,8 +1310,8 @@ class hyperDAQ():
         initial = self.images[0].data
         rows, cols = initial.shape
 
-        xinches = 6.85
-        yinches = 5.53 #5.7
+        xinches = pm.PLT_xsize_inches
+        yinches = pm.PLT_ysize_inches
         xmargin = 0.85
         ymargin = 0.5
         width = 4.75
