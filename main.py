@@ -1316,7 +1316,7 @@ class hyperDAQ():
         ymargin = 0.5
         cbwidth = 0.25
         cbint = 0.15
-        width = xinches - 2*xmargin - cbwidth - cbint #4.75
+        width = xinches - 2*xmargin - cbwidth - cbint
         for i in range(self.num_plots):
             # Create the figure
             self.figs.append(plt.figure(i+1, figsize=(xinches, yinches), facecolor='#f0f0f0'))
@@ -1325,7 +1325,7 @@ class hyperDAQ():
             plt.sca(ax)
 
             # Setup the axis
-            plt.suptitle(self.titles[i], fontsize=16, y=0.99)
+            plt.suptitle(self.titles[i], fontsize='larger', y=0.99)
             ax.set_xlabel(self.xlabels[i])
             ax.set_ylabel(self.ylabels[i])
             ax.tick_params(direction='out', top=False, right=False)

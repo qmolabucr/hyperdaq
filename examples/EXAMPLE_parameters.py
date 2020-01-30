@@ -124,9 +124,9 @@ PLT_image1_title = "Photocurrent Image"
 PLT_image0_cmap = 'plasma'
 PLT_image1_cmap = 'viridis'
 
-# Plot sizes
-PLT_xsize_inches = 6.85
-PLT_ysize_inches = 5.53
+# Plot sizes, the apprixomate size of the main plots
+PLT_xsize_inches = 5.25
+PLT_ysize_inches = 4.0
 
 # GUI defaults
 DEFAULT_fastaxis_start = -1.0/SCAN_units_to_volts
