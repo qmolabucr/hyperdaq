@@ -24,11 +24,10 @@ from hyperdaq.utilities import Stopwatch
 from hyperdaq.writing import data_scan_writer
 from hyperdaq.card import card_control_acquire
 
-#### Import hyperDAQ Hardware Interfaces and Controllers ####
-# Warning: Import specific objects from modules, importing all may causes errors if you
-# do not have all necessary parameters in your parameters file
+#### Import hyperDAQ Hardware Interfaces ####
 from hyperdaq.devices_gui import thor_delay_stage, lakeshore_336_temperature
 
+#### Import hyperDAQ Hardware Controllers ####
 from hyperdaq.thordevices import DelayController
 from hyperdaq.serialcom import lakeshore_336
 

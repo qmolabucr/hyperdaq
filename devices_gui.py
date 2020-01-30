@@ -858,144 +858,144 @@ class spectrapro_monochrometer(generic_device):
 # end MIRA_900_OPO
 
 
-
 '''
-UPDATES FROM DAVE 11/2018
+CODE FROM DAVE 11/2018
 
-NOT REVIEWED, POSSIBLY INCOMPATABLE
+CURRENTLY BREAKS OTHER SETUPS, NEEDS TO BE MOVED TO A SYSTEM SPECIFIC FILE
+OR RE-WRITTEN
 '''
 
-class NDF_rotation_stage(thor_rotation_stage):
-    '''
-    	Was least evil way of accomplishing everything I wanted without
-    	editing main.py or any other main library files. I also had to
-    	implement the diamond in order to save copy and paste time and
-    	in order to not edit any previous classes.
-
-    	NDF_rotation_angle contains only functions and variables shared by the
-    	interfaces for power and angle. rotationTEXT and powerTEXT are the user
-    	import text boxes for power and angle. It is shared so that a call to update
-    	from either interface will update both interfaces, helpfull if you want to keep
-    	track of both as you scan through one.
-    '''
-    rotationTEXT =  None
-    powerTEXT = None
-    ODperDegree = pm.NDFILTER_optical_density / pm.NDFILTER_angular_range
-
-
-    def degToPwr(self, degrees):
-        '''
-        take angle degrees and use the formula OD = degrees * OD/degree
-        to get optical density. Then use the formula I/I_0 = 10^(-OD).
-        I is assumed proportional to power, assumed proportional to
-        the reflection image's amplitude. We also use if statements
-        to catch angles that fall outside range and return early
-        '''
-        if degrees <= pm.NDFILTER_range_start or degrees >= pm.NDFILTER_range_end:
-            return 1
-        degrees -= pm.NDFILTER_range_start
-        if degrees >= 360.0:
-            degrees -= 360.0
-        if degrees < 0.0:
-            degrees += 360.0
-        OD = degrees * self.ODperDegree
-        return 0.1**OD
-    # end degToPwr
-
-
-    def update(self):
-        '''
-        Is overloaded method that will be used by both rotation and angle
-        interfaces so that when either is called to update, they both update.
-        '''
-        try:
-            angle = float(self.controller.angle)
-            pwr = self.degToPwr(angle)
-            NDF_rotation_stage.powerTEXT.set(str(round(pwr, 3)))
-            NDF_rotation_stage.rotationTEXT.set(str(round(angle, 3)))
-        except Exception as e:
-            self.gui.display_Error("could not update rotation stage position")
-    # end update
-# end NDF_rotation_stage
-
-class NDF_rotation_power(NDF_rotation_stage):
-    '''
-	Is an interface that allows scanning over the fraction I/I_0 in equal
-	steps or to just adjust this fraction as necessary
-
-	inherits degToPwr(), update(), and calibrate() from NDF_rotation_stage
-	inherits set_angle() and set_angle_callback() from thor_rotation_stage
-	inherits __init__() from generic_device
-    '''
-
-    def init_interface(self, anglename='ND Filter Power'):
-        self.rotationangleminiFRAME = tk.Frame(self.frame)
-
-        NDF_rotation_stage.powerTEXT = tk.StringVar()
-        NDF_rotation_stage.powerTEXT.set(str(round(self.degToPwr(self.controller.angle), 3)))
-
-        tk.Label(self.rotationangleminiFRAME, text="Percent Intensity: ").grid(row=0, column=0)
-        tk.Label(self.rotationangleminiFRAME, textvariable=self.powerTEXT, width=7).grid(row=0, column=1)
-
-        self.powerBUTTON = tk.Button(self.rotationangleminiFRAME, text="Set Power", command=self.set_power_callback, width=12)
-        self.powerBUTTON.grid(row=0, column=2, sticky=tk.W)
-
-        self.rotationangleminiFRAME.grid(row=0, column=0, stick='w')
-        self.anglename = str(anglename)
-    # end init_interface
-
-    def log_status(self):
-        try:
-            r = self.degToPwr(self.controller.angle)
-            self.data_out.log_param("NDF Rotation Stage Power Ratio", r)
-        except Exception as e:
-            self.gui.display_Error("could not log ndf rotation stage power ratio")
-    # end log_status
-
-    def pwrToDeg(self, pctPwr):
-        if pctPwr >= pm.NDFILTER_max_power:
-            return 0
-        elif pctPwr < pm.NDFILTER_min_power:
-            self.gui.display_Error("Power percentage is too low, " + str(round(pctPwr,3)) +
-            ". Must be at least " + str(round(pm.NDFILTER_min_power,3)) + ". Rotating to that position now.")
-            pctPwr = pm.NDFILTER_min_power
-        else:
-            OD = -1.0*np.log10(pctPwr)
-            degrees = pm.NDFILTER_range_start + ( OD / self.ODperDegree )
-            return degrees
-    # end pwrToDeg
-
-    def set_power(self, v):
-        self.set_angle(self.pwrToDeg(v))
-    # end set_delay
-
-    def set_power_callback(self):
-        spec = [[self.anglename, 'Percent', str(round(100.0*self.degToPwr(self.controller.angle), 2))]]
-        p = self.gui.popup_entry("Enter New Percent Intensity", spec)
-        degrees = 0
-        try:
-            pwr = float(p[0]) / 100.0
-            degrees = self.pwrToDeg(pwr)
-        except:
-            self.gui.display_Error('Given Value is Not a Float')
-            return
-        if degrees >= pm.ROTATION_min_angle and degrees <= pm.ROTATION_max_angle:
-            self.gui.control_queue.put([self.controller.MoveDeg, [degrees]])
-            self.gui.display_Text('Setting ndf power to ' + str(round(pwr,2)) + '(' + str(round(degrees,2)) + 'degrees)')
-            self.gui.display_Text('Setting rotation')
-        else:
-            s = 'position must be between '+str(pm.ROTATION_min_angle)+ ' and ' +str(pm.ROTATION_max_angle)+ ' degrees'
-            self.gui.display_Error(s)
-    # end set_power_callback
-#end NDF_rotation_power
-
-class NDF_rotation_angle(NDF_rotation_stage):
-    '''
-	is an interface class that allows working with the filter's angle directly
-	instead of using power.
-    '''
-    def init_interface(self):
-        thor_rotation_stage.init_interface(self, anglename='ND Filter Angle', angletitle="ND Filter Angle: ", anglelog="ND Filter Angle ")
-        NDF_rotation_stage.rotationTEXT = self.rotationTEXT
-    # end init_interface
-# end NDF_rotation_angle
+# class NDF_rotation_stage(thor_rotation_stage):
+#     '''
+#     	Was least evil way of accomplishing everything I wanted without
+#     	editing main.py or any other main library files. I also had to
+#     	implement the diamond in order to save copy and paste time and
+#     	in order to not edit any previous classes.
+#
+#     	NDF_rotation_angle contains only functions and variables shared by the
+#     	interfaces for power and angle. rotationTEXT and powerTEXT are the user
+#     	import text boxes for power and angle. It is shared so that a call to update
+#     	from either interface will update both interfaces, helpfull if you want to keep
+#     	track of both as you scan through one.
+#     '''
+#     rotationTEXT =  None
+#     powerTEXT = None
+#     ODperDegree = pm.NDFILTER_optical_density / pm.NDFILTER_angular_range
+#
+#
+#     def degToPwr(self, degrees):
+#         '''
+#         take angle degrees and use the formula OD = degrees * OD/degree
+#         to get optical density. Then use the formula I/I_0 = 10^(-OD).
+#         I is assumed proportional to power, assumed proportional to
+#         the reflection image's amplitude. We also use if statements
+#         to catch angles that fall outside range and return early
+#         '''
+#         if degrees <= pm.NDFILTER_range_start or degrees >= pm.NDFILTER_range_end:
+#             return 1
+#         degrees -= pm.NDFILTER_range_start
+#         if degrees >= 360.0:
+#             degrees -= 360.0
+#         if degrees < 0.0:
+#             degrees += 360.0
+#         OD = degrees * self.ODperDegree
+#         return 0.1**OD
+#     # end degToPwr
+#
+#
+#     def update(self):
+#         '''
+#         Is overloaded method that will be used by both rotation and angle
+#         interfaces so that when either is called to update, they both update.
+#         '''
+#         try:
+#             angle = float(self.controller.angle)
+#             pwr = self.degToPwr(angle)
+#             NDF_rotation_stage.powerTEXT.set(str(round(pwr, 3)))
+#             NDF_rotation_stage.rotationTEXT.set(str(round(angle, 3)))
+#         except Exception as e:
+#             self.gui.display_Error("could not update rotation stage position")
+#     # end update
+# # end NDF_rotation_stage
+#
+# class NDF_rotation_power(NDF_rotation_stage):
+#     '''
+# 	Is an interface that allows scanning over the fraction I/I_0 in equal
+# 	steps or to just adjust this fraction as necessary
+#
+# 	inherits degToPwr(), update(), and calibrate() from NDF_rotation_stage
+# 	inherits set_angle() and set_angle_callback() from thor_rotation_stage
+# 	inherits __init__() from generic_device
+#     '''
+#
+#     def init_interface(self, anglename='ND Filter Power'):
+#         self.rotationangleminiFRAME = tk.Frame(self.frame)
+#
+#         NDF_rotation_stage.powerTEXT = tk.StringVar()
+#         NDF_rotation_stage.powerTEXT.set(str(round(self.degToPwr(self.controller.angle), 3)))
+#
+#         tk.Label(self.rotationangleminiFRAME, text="Percent Intensity: ").grid(row=0, column=0)
+#         tk.Label(self.rotationangleminiFRAME, textvariable=self.powerTEXT, width=7).grid(row=0, column=1)
+#
+#         self.powerBUTTON = tk.Button(self.rotationangleminiFRAME, text="Set Power", command=self.set_power_callback, width=12)
+#         self.powerBUTTON.grid(row=0, column=2, sticky=tk.W)
+#
+#         self.rotationangleminiFRAME.grid(row=0, column=0, stick='w')
+#         self.anglename = str(anglename)
+#     # end init_interface
+#
+#     def log_status(self):
+#         try:
+#             r = self.degToPwr(self.controller.angle)
+#             self.data_out.log_param("NDF Rotation Stage Power Ratio", r)
+#         except Exception as e:
+#             self.gui.display_Error("could not log ndf rotation stage power ratio")
+#     # end log_status
+#
+#     def pwrToDeg(self, pctPwr):
+#         if pctPwr >= pm.NDFILTER_max_power:
+#             return 0
+#         elif pctPwr < pm.NDFILTER_min_power:
+#             self.gui.display_Error("Power percentage is too low, " + str(round(pctPwr,3)) +
+#             ". Must be at least " + str(round(pm.NDFILTER_min_power,3)) + ". Rotating to that position now.")
+#             pctPwr = pm.NDFILTER_min_power
+#         else:
+#             OD = -1.0*np.log10(pctPwr)
+#             degrees = pm.NDFILTER_range_start + ( OD / self.ODperDegree )
+#             return degrees
+#     # end pwrToDeg
+#
+#     def set_power(self, v):
+#         self.set_angle(self.pwrToDeg(v))
+#     # end set_delay
+#
+#     def set_power_callback(self):
+#         spec = [[self.anglename, 'Percent', str(round(100.0*self.degToPwr(self.controller.angle), 2))]]
+#         p = self.gui.popup_entry("Enter New Percent Intensity", spec)
+#         degrees = 0
+#         try:
+#             pwr = float(p[0]) / 100.0
+#             degrees = self.pwrToDeg(pwr)
+#         except:
+#             self.gui.display_Error('Given Value is Not a Float')
+#             return
+#         if degrees >= pm.ROTATION_min_angle and degrees <= pm.ROTATION_max_angle:
+#             self.gui.control_queue.put([self.controller.MoveDeg, [degrees]])
+#             self.gui.display_Text('Setting ndf power to ' + str(round(pwr,2)) + '(' + str(round(degrees,2)) + 'degrees)')
+#             self.gui.display_Text('Setting rotation')
+#         else:
+#             s = 'position must be between '+str(pm.ROTATION_min_angle)+ ' and ' +str(pm.ROTATION_max_angle)+ ' degrees'
+#             self.gui.display_Error(s)
+#     # end set_power_callback
+# #end NDF_rotation_power
+#
+# class NDF_rotation_angle(NDF_rotation_stage):
+#     '''
+# 	is an interface class that allows working with the filter's angle directly
+# 	instead of using power.
+#     '''
+#     def init_interface(self):
+#         thor_rotation_stage.init_interface(self, anglename='ND Filter Angle', angletitle="ND Filter Angle: ", anglelog="ND Filter Angle ")
+#         NDF_rotation_stage.rotationTEXT = self.rotationTEXT
+#     # end init_interface
+# # end NDF_rotation_angle
