@@ -14,17 +14,23 @@ All Rights Reserved
 import traceback
 from os.path import exists
 
-#### Import hyperDAQ  Modules and parameters ####
+#### Import hyperDAQ parameters ####
 import parameters as pm
+
+#### Import hyperDAQ objects ####
 from hyperdaq.main import hyperDAQ
 from hyperdaq.processing import data_image_2
 from hyperdaq.utilities import Stopwatch
 from hyperdaq.writing import data_scan_writer
 from hyperdaq.card import card_control_acquire
-import hyperdaq.devices_gui as devices_gui
 
-import hyperdaq.thordevices as thordevices
-import hyperdaq.thordevices as serialcom
+#### Import hyperDAQ Hardware Interfaces and Controllers ####
+# Warning: Import specific objects from modules, importing all may causes errors if you
+# do not have all necessary parameters in your parameters file
+from hyperdaq.devices_gui import thor_delay_stage, lakeshore_336_temperature
+
+from hyperdaq.thordevices import DelayController
+from hyperdaq.serialcom import lakeshore_336
 
 '''
 #############################
@@ -71,16 +77,16 @@ print("Initilizing External Devices")
 
 ## An example of how to add a Thor Labs device, in this case a delay stage controller
 try:
-	device_dict['delay_stage'] = thordevices.DelayController(pm.SERIAL_delay)
-	interface_dict['delay_stage'] = devices_gui.thor_delay_stage
+	device_dict['delay_stage'] = DelayController(pm.SERIAL_delay)
+	interface_dict['delay_stage'] = thor_delay_stage
 except Exception as e:
 	print("Error could not load the Optical Delay Stage")
 	print(traceback.format_exc())
 
 ## An example of how to add a serial device, in this case a Lakeshore temeprature controller
 try:
-	device_dict['temp_control'] = serialcom.lakeshore_336(pm.COM_tempcontrol, sys_time)
-	interface_dict['temp_control'] = devices_gui.lakeshore_336_temperature
+	device_dict['temp_control'] = lakeshore_336(pm.COM_tempcontrol, sys_time)
+	interface_dict['temp_control'] = lakeshore_336_temperature
 except Exception as e:
 	print("Error could not load the Temperature Controller")
 	print(traceback.format_exc())
