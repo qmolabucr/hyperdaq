@@ -50,15 +50,15 @@ photo_image = data_image_2(card_q[1], pm.PCI_IMG_index, scanner)
 ## Example of how to add an auxiliary image, for example an image of lser power. Note that
 ## pm.NUM_card_queues needs to reflect the total number of images, if it is larger than the
 ## actual number of data image objects it will cause a memory leak.
-power_image = data_image_2(card_q[2], pm.POW_IMG_index, scanner)
-aux_images = {'powerimg':power_image}
+#power_image = data_image_2(card_q[2], pm.POW_IMG_index, scanner)
+#aux_images = {'powerimg':power_image}
 
 # If there are no auxiliary images, initialize an empty
-# aux_images = dict()
+aux_images = dict()
 
 # Initialize Data Writer, give it the images and the extensions for all the images
-data_out = data_scan_writer([ref_image, photo_image, power_image], ['rfi','pci','pow']) # Include auxillary images, if they exist
-# data_out = data_scan_writer([ref_image, photo_image], ['rfi','pci']) # If there are no auxillary images
+# data_out = data_scan_writer([ref_image, photo_image, power_image], ['rfi','pci','pow']) # Include auxillary images, if they exist
+data_out = data_scan_writer([ref_image, photo_image], ['rfi','pci']) # If there are no auxillary images
 
 '''
 #############################
@@ -75,20 +75,20 @@ interface_dict = dict()
 print("Initilizing External Devices")
 
 ## An example of how to add a Thor Labs device, in this case a delay stage controller
-try:
-	device_dict['delay_stage'] = DelayController(pm.SERIAL_delay)
-	interface_dict['delay_stage'] = thor_delay_stage
-except Exception as e:
-	print("Error could not load the Optical Delay Stage")
-	print(traceback.format_exc())
+# try:
+# 	device_dict['delay_stage'] = DelayController(pm.SERIAL_delay)
+# 	interface_dict['delay_stage'] = thor_delay_stage
+# except Exception as e:
+# 	print("Error could not load the Optical Delay Stage")
+# 	print(traceback.format_exc())
 
 ## An example of how to add a serial device, in this case a Lakeshore temeprature controller
-try:
-	device_dict['temp_control'] = lakeshore_336(pm.COM_tempcontrol, sys_time)
-	interface_dict['temp_control'] = lakeshore_336_temperature
-except Exception as e:
-	print("Error could not load the Temperature Controller")
-	print(traceback.format_exc())
+# try:
+# 	device_dict['temp_control'] = lakeshore_336(pm.COM_tempcontrol, sys_time)
+# 	interface_dict['temp_control'] = lakeshore_336_temperature
+# except Exception as e:
+# 	print("Error could not load the Temperature Controller")
+# 	print(traceback.format_exc())
 
 '''
 ##########################################
