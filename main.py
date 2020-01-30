@@ -1151,7 +1151,7 @@ class hyperDAQ():
         self.init_parameters_frame(self.scanningFRAME)
 
         # Grid the widgets
-        scan_params_miniFRAME.grid(row=0, sticky=tk.N+tk.W)
+        scan_params_miniFRAME.grid(row=0, sticky=tk.N+tk.W+tk.E)
 
         self.fast_axis.frame.grid(row=1, sticky=tk.N+tk.W+tk.E)
         self.slow_axis.frame.grid(row=2, sticky=tk.N+tk.W+tk.E)
@@ -1314,9 +1314,9 @@ class hyperDAQ():
         yinches = pm.PLT_ysize_inches
         xmargin = 0.85
         ymargin = 0.5
-        width = 4.75
         cbwidth = 0.25
         cbint = 0.15
+        width = xinches - 2*xmargin - cbwidth - cbint #4.75
         for i in range(self.num_plots):
             # Create the figure
             self.figs.append(plt.figure(i+1, figsize=(xinches, yinches), facecolor='#f0f0f0'))
