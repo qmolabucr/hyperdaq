@@ -1,7 +1,7 @@
 '''
 EXAMPLE_hyperDAQ
 
-Data Acquisition for the Cryomagnetic Probe Station
+Data Acquisition for the EXAMPLE system
 
 Last updated: January 2020 by Trevor Arp
 
@@ -33,10 +33,15 @@ from hyperdaq.serialcom import lakeshore_336
 
 '''
 #############################
+Workspace, Define System Specific functions/objects/imports Here
+#############################
+'''
+
+'''
+#############################
 Core DAQ Card Initializations
 #############################
 '''
-sys_time = Stopwatch() # Initialize peripheral timer, keeps time between the various components
 
 # Initialize DAQ card
 print("Initializing DAQ Card")
@@ -47,7 +52,7 @@ card_q = scanner.get_output_queues() # Queues of data to be passed out of the ca
 ref_image   = data_image_2(card_q[0], pm.RFI_IMG_index, scanner)
 photo_image = data_image_2(card_q[1], pm.PCI_IMG_index, scanner)
 
-## Example of how to add an auxiliary image, for example an image of lser power. Note that
+## Example of how to add an auxiliary image, for example an image of laser power. Note that
 ## pm.NUM_card_queues needs to reflect the total number of images, if it is larger than the
 ## actual number of data image objects it will cause a memory leak.
 #power_image = data_image_2(card_q[2], pm.POW_IMG_index, scanner)
@@ -57,22 +62,24 @@ photo_image = data_image_2(card_q[1], pm.PCI_IMG_index, scanner)
 aux_images = dict()
 
 # Initialize Data Writer, give it the images and the extensions for all the images
-# data_out = data_scan_writer([ref_image, photo_image, power_image], ['rfi','pci','pow']) # Include auxillary images, if they exist
-data_out = data_scan_writer([ref_image, photo_image], ['rfi','pci']) # If there are no auxillary images
+# data_out = data_scan_writer([ref_image, photo_image, power_image], ['rfi','pci','pow']) # Include auxiliary images, if they exist
+data_out = data_scan_writer([ref_image, photo_image], ['rfi','pci']) # If there are no auxiliary images
 
 '''
 #############################
-Device Initilizations
+Device Initializations
 #############################
 '''
 # Contains a dictionary of hardware controllers, to pass to the main interface
 device_dict = dict()
 
 # Contains a dictionary of interfaces for the hardware controllers, passed by reference so they can
-# be initilized in the main interface, shares keys with device_dict
+# be initialized in the main interface, shares keys with device_dict
 interface_dict = dict()
 
-print("Initilizing External Devices")
+print("Initializing External Devices")
+
+sys_time = Stopwatch() # Initialize peripheral timer, keeps time between the various components, often required by serial devices
 
 ## An example of how to add a Thor Labs device, in this case a delay stage controller
 # try:
@@ -82,7 +89,7 @@ print("Initilizing External Devices")
 # 	print("Error could not load the Optical Delay Stage")
 # 	print(traceback.format_exc())
 
-## An example of how to add a serial device, in this case a Lakeshore temeprature controller
+## An example of how to add a serial device, in this case a Lakeshore Temperature controller
 # try:
 # 	device_dict['temp_control'] = lakeshore_336(pm.COM_tempcontrol, sys_time)
 # 	interface_dict['temp_control'] = lakeshore_336_temperature
@@ -129,7 +136,7 @@ if exists(pm.PARAMS_file):
 	if len(ep) == len(exp_params):
 		exp_params = ep
 
-# Initilize the GUI
+# Initialize the GUI
 hyperDAQ(
 	[ref_image, photo_image],
 	aux_images,

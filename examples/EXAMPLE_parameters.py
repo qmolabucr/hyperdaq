@@ -13,8 +13,8 @@ SCAN_units = "Volts" # "Micron"
 # and the sample/experiment. These exist so that the values displayed on the GUI are
 # the real values applied to the sample
 # A dictionary where Key is the channel identifier
-# Values are (multipiler, offset)
-# multiplier : V(card)/V(Output of electionics)
+# Values are (multiplier, offset)
+# multiplier : V(card)/V(Output of electronics)
 CHANNEL_calibration = {
     'xaxis':(1.0,0.0),
     'yaxis':(1.0,0.0),
@@ -25,7 +25,7 @@ CHANNEL_calibration = {
 ## Example of calibration parameters for the Thor Labs device defined in EXAMPLE_hyperdaq
 ## Delay Stage Calibration
 # DELAY_mm_to_ps = 6.673 # ps/mm
-# DELAY_center_position = 107.506 #107.473 #108.125 # mm +/- 0.01
+# DELAY_center_position = 107.506 # mm +/- 0.01
 
 '''
 ####################################
@@ -59,11 +59,11 @@ CHANNEL_calibration = {
 Change based on system, should only be changed infrequently
 '''
 # Identifier for the all the files taken by this system, should be uniform across everything
-# Related to this experimental system
-SYSTEM_prefix = "CPS"
+# Related to this experimental system, often three or four letters
+SYSTEM_prefix = "EXMP"
 
 # Path to the directory where the raw data is saved, it is often useful to have a file for the raw
-# and processes data in teh same directory, with the same direcotry structures.
+# and processes data in the same directory, with the same directory structures.
 DATA_dir_path = "E:\\Data\\Raw\\"
 
 # The number of Queues the card controller should fill, needs to correspond to the number of
@@ -71,7 +71,7 @@ DATA_dir_path = "E:\\Data\\Raw\\"
 NUM_card_queues = 2
 
 # The NI DAQ card controller returns data for all defined card inputs channels, and passes an array
-# where the columns correspond to different input chanels. These indicies tell the data_images which
+# where the columns correspond to different input channels. These indices tell the data_images which
 # column index corresponds to input they are tracking. This may change based on the specific NI card.
 RFI_IMG_index = 0
 PCI_IMG_index = 2
@@ -83,16 +83,19 @@ CARD_AO_Min = -10.0
 CARD_AI_Max = 10.0
 CARD_AI_Min = -10.0
 
-# DAQ card Channel Parameters
+# DAQ Input Channel Parameters
 NUM_input_channels = 10
 DEVICE_output = 'Dev1/'
 CHANNEL_input = "Dev1/ai0:7, Dev1/ai16:17"
+
+# DAQ Output Channel Parameters, additional voltage channels can be added so long as they are 
+# implemented in the card controller
 CHANNEL_x = 'Dev1/ao0'
 CHANNEL_y = 'Dev1/ao1'
-CHANNEL_vsd = 'Dev1/ao2'
-CHANNEL_vbg = 'Dev1/ao3'
+CHANNEL_v1 = 'Dev1/ao2'
+CHANNEL_v2 = 'Dev1/ao3'
 
-# DAQ card channel Labels
+# DAQ card channel Labels, to be displayed on the User Interface
 CLABEL_x = 'ao0'
 CLABEL_y = 'ao1'
 CLABEL_vsd = 'ao2'
@@ -124,7 +127,7 @@ PLT_image1_title = "Photocurrent Image"
 PLT_image0_cmap = 'plasma'
 PLT_image1_cmap = 'viridis'
 
-# Plot sizes, the apprixomate size of the main plots
+# Plot sizes, the approximate size of the main plots
 PLT_xsize_inches = 5.25
 PLT_ysize_inches = 4.0
 
@@ -133,8 +136,10 @@ DEFAULT_fastaxis_start = -1.0/SCAN_units_to_volts
 DEFAULT_fastaxis_end = 1.0/SCAN_units_to_volts
 DEFAULT_slowaxis_start = -1.0/SCAN_units_to_volts
 DEFAULT_slowaxis_end = 1.0/SCAN_units_to_volts
+NUM_x_points = 200 # Number of x points in an image, default
+NUM_y_points = 200 # Number of y points in an image, default
 
-# Function wait times, cause a delay after a command is sent to a peice of hardware, to give it time to respond
+# Function wait times, cause a delay after a command is sent to a piece of hardware, to give it time to respond
 CNTL_function_wait = 0.1 # Wait after calling a hardware function while scanning
 CNTL_fast_function_wait = 0.1 # Wait after calling a hardware function, with the function on the fast axis
 CNTL_repeat_wait = 0.5 # Wait before repeating (seconds)
@@ -161,7 +166,7 @@ SCAN_spatial_parameters = ['xaxis', 'yaxis', 'scanangle']
 # Lognames are how the parameter is recorded in the log file, these names are also displayed minus the word "Value"
 SCAN_spatial_lognames = ['Center X Value', 'Center Y Value', 'Scan Angle']
 
-# These are voltage card outputs that are required, they will be automatically saved, controled and set constant as appropriate
+# These are voltage card outputs that are required, they will be automatically saved, controlled and set constant as appropriate
 SCAN_voltage_parameters = ['vsd', 'vbg']
 # Lognames are how the parameter is recorded in the log file, these names are also displayed on the interface
 SCAN_voltage_lognames = ['Source/Drain', 'Backgate']
@@ -184,8 +189,6 @@ DEFAULT_number = 10
 MASTER_sample_freq = 20000.0 # DAQ card sample frequency, type = float
 
 # Image parameters
-NUM_x_points = 200 # Number of x points in an image, default
-NUM_y_points = 200 # Number of y points in an image, default
 NUM_max_points = 5000 # Maximum Number of x or y points in an image
 
 # Main loop and GUI timing

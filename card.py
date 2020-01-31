@@ -84,8 +84,8 @@ class card_control_acquire():
         self.AItask = TaskHandle(1)
         self.chanX = pm.CHANNEL_x
         self.chanY = pm.CHANNEL_y
-        self.chanS = pm.CHANNEL_vsd
-        self.chanB = pm.CHANNEL_vbg
+        self.chanS = pm.CHANNEL_v1
+        self.chanB = pm.CHANNEL_v2
         self.chanINPUT = pm.CHANNEL_input
         self.triggerName = "ai/StartTrigger"
         self.clockSource = b'OnboardClock'
