@@ -25,7 +25,7 @@ from hyperdaq.writing import data_scan_writer
 from hyperdaq.card import card_control_acquire
 
 #### Import hyperDAQ Hardware Interfaces ####
-from hyperdaq.devices_gui import thor_delay_stage, lakeshore_336_temperature
+from hyperdaq.devicegui import thor_delay_stage, lakeshore_336_temperature
 
 #### Import hyperDAQ Hardware Controllers ####
 from hyperdaq.thordevices import DelayController
@@ -99,13 +99,13 @@ sys_time = Stopwatch() # Initialize peripheral timer, keeps time between the var
 
 '''
 ##########################################
-Setup Scanning and Experimental Parameters
+Setup Scanning Configuration and Experimental Parameters
 ##########################################
 '''
 # Parameters that can be used as axes, the keys of this dictionary are the channel identifiers
 # "device_key":["Label", "unit", fast_function, slow_function, (default_start, default_end), (minimum, maximum)]
 # Where fast_function and slow_function are the functions to call for scanning on the fast and slow axes, usually the same
-scan_params = {
+scan_config = {
 	'xaxis': ["X Axis ("+pm.CLABEL_x+")", pm.SCAN_units, None, None, (pm.DEFAULT_fastaxis_start, pm.DEFAULT_fastaxis_end), (pm.CARD_AO_Min, pm.CARD_AO_Max)],
 	'yaxis': ["Y Axis ("+pm.CLABEL_y+")", pm.SCAN_units, None, None, (pm.DEFAULT_slowaxis_start, pm.DEFAULT_slowaxis_end), (pm.CARD_AO_Min, pm.CARD_AO_Max)],
 	'vsd': ["Source/Drain ("+pm.CLABEL_vsd+")", "Volts", None, None, (0.0, 0.0), (pm.CARD_AO_Min, pm.CARD_AO_Max)],
@@ -144,7 +144,7 @@ hyperDAQ(
 	data_out,
 	device_dict,
 	interface_dict,
-	scan_params,
+	scan_config,
 	exp_params,
 	exp_params_units
 )

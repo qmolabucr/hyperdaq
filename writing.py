@@ -23,10 +23,9 @@ class data_scan_writer:
 	'''
 	Handles data writing of scans based on data images
 
-	$images is the data image objects, (or derived classes) corresponding to the scan data to be
-	written out
-
-	$images_ext are the file extensions for the image objects in $images
+	Args:
+		images (data_image_2) : The data image objects (or derived classes) corresponding to the scan data to be written out
+		images_ext (list) : The file extensions for the image objects in images
 	'''
 	def __init__(self, images, images_ext, buffer=True):
 		self.recording = False
@@ -254,7 +253,9 @@ class data_scan_writer:
 	def log_str(self, txt):
 		'''
 		Records a message to the log file, buffers the change message if not recording
-		$txt is the text to be written to the log file
+
+		Args:
+			txt (str) : the text to be written to the log file
 		'''
 		message = str(txt) + "\n"
 		self.scan_buffer.append(message)

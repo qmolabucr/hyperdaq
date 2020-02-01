@@ -27,7 +27,8 @@ class serial_device(threading.Thread):
 	'''
 	A base class for communicating with serial devices
 
-	$com_port string that sets the COM port used by the serial device e.g. "COM2"
+	Args:
+		com_port : string that sets the COM port used by the serial device e.g. "COM2"
 
 	'''
 	def __init__(self, com_port, Baudrate=57600, Parity=serial.PARITY_ODD, Stopbits=serial.STOPBITS_ONE, Bytesize=serial.SEVENBITS, Terminator='\r\n', Timeout=0.05):
@@ -193,8 +194,9 @@ class serial_device_listener(serial_device):
 	Continuously calls the read_data() function, override to define read data from
 	the device
 
-	$com_port string that sets the COM port used by the serial device e.g. "COM2"
-	$sys_time is a synchronized Stopwatch object for timing
+	Args:
+		com_port : string that sets the COM port used by the serial device e.g. "COM2"
+		sys_time : a synchronized Stopwatch object for timing
 
 	'''
 	def __init__(self, com_port, sys_time, Baudrate=57600, Parity=serial.PARITY_ODD, Stopbits=serial.STOPBITS_ONE, Bytesize=serial.SEVENBITS, Terminator='\r\n',Timeout=0.05):
@@ -262,7 +264,7 @@ class serial_device_listener(serial_device):
 
 	def get_current_data(self, command):
 		'''
-		Pauses main task to send $command to the device and waits for response
+		Pauses main task to send command to the device and waits for response
 		Returns None if the device isn't running
 		'''
 		if self.running:
@@ -454,12 +456,13 @@ class lakeshore_625(serial_device_listener):
 	'''
 	Defines a controller for a LakeShore Model 625 Superconducting Magnet Power supply
 
-	$com_port string that sets the COM port used by the serial device e.g. "COM6"
+	Args:
+		com_port : string that sets the COM port used by the serial device e.g. "COM6"
 
-	Properties that can be accessed after run() is called
-	.voltage # The output voltage, Units in Volts
-	.current # The output current, Units in Amps
-	.field   # The central field, computed from the current based on calibration, Units in Tesla
+	Attributes:
+		voltage : The output voltage, Units in Volts
+		current : The output current, Units in Amps
+		field   : The central field, computed from the current based on calibration, Units in Tesla
 
 	'''
 	def __init__(self, com_port, sys_time):
@@ -501,10 +504,11 @@ class spectrapro_2300(serial_device):
 	'''
 	Defines a controller for the SpectraPro-2300 Monochrometer
 
-	$com_port string that sets the COM port used by the serial device e.g. "COM6"
+	Args:
+		com_port : string that sets the COM port used by the serial device e.g. "COM6"
 
-	Properties that can be accessed after run() is called
-	.wavelength # The Wavelength, in nm
+	Attributes:
+		wavelength : The Wavelength, in nm
 
 	'''
 	def __init__(self, com_port, sys_time):
@@ -560,13 +564,14 @@ class mira_900_OPO(serial_device_listener):
 	'''
 	Defines a controller for the OPO controller
 
-	$com_port string that sets the COM port used by the serial device e.g. "COM6"
+	Args:
+		com_port : string that sets the COM port used by the serial device e.g. "COM6"
 
-	Properties that can be accessed after run() is called
-	.wavelength # The Wavelength, in nm
-	.power # The IR power in arbitrary units
-	.piezo # the piezo voltage
-	.RH # The relative Humidity in the cavity
+	Attributes:
+		wavelength : The Wavelength, in nm
+		power : The IR power in arbitrary units
+		piezo : the piezo voltage
+		RH : The relative Humidity in the cavity
 
 	'''
 	def __init__(self, com_port, sys_time):

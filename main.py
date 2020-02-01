@@ -653,25 +653,22 @@ class hyperDAQ():
     The main user inferface and control for the DAQ. Meant to be generic, extended
     using inheritance.
 
-    Parameters:
-    $card_in is the data input object reading from the NI DAQ card
-
-    $images is a list of images to display
-
-    $auximages is a dictionary of auxillary images, that are not displayed but will still be
-    updated. The keys allow the images to be specifically accessed by various interfaces. Set
-    to None if there are no auxillary images
-
-    $card_control is the controller for the DAQ card
-
-    $scan_params is a dictionary containing the parameters that it is possible to scan over, dictionary
-    is formatted as "device_key":["Label", "unit", fast_function, slow_function, (default_start, default_end)]
-    where the device_key can be used to find the device in the device dict or identifier for a voltage output,
-    label, unit and defaults are displayed and fast_function/slow_function are the functions that can be used
-    to scan the device over the fast and slow axies respectivly (or None for voltage output).
-
     To add new axes to this generic interface use inheritance and override the function
     init_extra_axes, which sets any additional axes beyond the fast, slow and cube
+
+    Args:
+        card_in : is the data input object reading from the NI DAQ card
+        images : is a list of images to display
+        auximages : is a dictionary of auxillary images, that are not displayed but will still be
+            updated. The keys allow the images to be specifically accessed by various interfaces. Set
+            to None if there are no auxillary images
+        card_control : is the controller for the DAQ card
+        scan_params : is a dictionary containing the parameters that it is possible to scan over,
+            dictionary is formatted as "device_key":["Label", "unit", fast_function, slow_function,
+            (default_start, default_end)] where the device_key can be used to find the device in
+            the device dict or identifier for a voltage output, label, unit and defaults are
+            displayed and fast_function/slow_function are the functions that can be used to scan
+            the device over the fast and slow axies respectivly (or None for voltage output).
     '''
 
     '''
@@ -1484,14 +1481,16 @@ class hyperDAQ():
     def popup_entry(self, title, spec, entry_width=None):
         '''
         Function that can be used to get input from a user, for use in callback functions
-        $title is the title of the popup window
-        $spec is an array that defines the behavior of the popup, for each variable to reterive spec contains a list
-        specifying what to say before and after and the starting value to be displayed. For example for a popup asking for two quatifies
-        spec = [
-            ['Quatity A', 'Units A', Starting_Value],
-            ['Quatity B', 'Units B', Starting_Value]
-        ]
-        when done a list is returned containing user input [Quantity_A, Quantity_B]
+
+        Args:
+            title : The title of the popup window
+            spec : An array that defines the behavior of the popup, for each variable to reterive spec
+                contains a list specifying what to say before and after and the starting value to be
+                displayed. For example for a popup asking for two quatifies spec = [['Quantity A',
+                'Units A', Starting_Value], ['Quantity B', 'Units B', Starting_Value]]
+
+        Returns:
+            When done a list is returned containing user input [Quantity_A, Quantity_B]
         '''
         class popupWindow(object):
             def __init__(self, master, title, spec, entry_Width=5):

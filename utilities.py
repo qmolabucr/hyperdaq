@@ -20,7 +20,7 @@ from tkinter import END
 
 def indexof(list, item):
 	'''
-	Searches $list and returns the index of $item. Returns -1 if it can't find it.
+	Searches list and returns the index of item. Returns -1 if it can't find it.
 	Compares as strings
 	'''
 	for i in range(len(list)):
@@ -74,7 +74,9 @@ def hl2int(d):
 def dequeue_all(q):
 	'''
 	Removes all elements from the given data queue, returns data in a single array
-	$q is the input queue, containing data in numpy format
+
+	Args:
+		q (Queue) : the input queue, containing data as numpy arrays
 	'''
 	try:
 		d = q.get()
@@ -104,7 +106,9 @@ def dequeue_n(q, n):
 	'''
 	Removes n elements from the given data queue, and concatenates them, will
 	return if the queue is empty even if n elements have not been collected
-	$q is the input queue, containing data in numpy format
+
+	Args:
+		q (Queue) : the input queue, containing data as numpy arrays
 	'''
 	try:
 		d = q.get()
@@ -121,7 +125,9 @@ def dequeue_n(q, n):
 def dequeue_str(q):
 	'''
 	Removes all elements from the given data queue
-	- $q is the input queue, containing data as strings
+
+	Args:
+		q (Queue) : the input queue, containing data as strings
 	'''
 	try:
 		d = []
@@ -166,10 +172,10 @@ def brute_diff_min(d1, d2, maxdrift=15):
 	Brute Force approach to drift correction of reflection images, find the minimum difference between
 	the (normalized) two images by brute force.
 
-	Parameters:
-	- d1, the prime image
-	- d2, the image to correct
-	- maxdrift=10, the maximum number of pixels to consider
+	Args:
+		d1 (numpy array) : the prime image
+		d2 (numpy array) : the image to correct
+		maxdrift=15, the maximum number of pixels to consider
 
 	Returns the shift that maps d2 onto d1 with the minimum difference
 	'''

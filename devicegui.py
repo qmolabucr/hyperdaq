@@ -1,7 +1,7 @@
 '''
 hyperDAQ : Hypercubic Data Aquisition Program
 
-devices_gui.py
+devicegui.py
 
 A module for user interfaces of hardware devices controlled through hyperDAQ
 

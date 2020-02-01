@@ -58,24 +58,25 @@ class card_control_acquire():
     card_control_acquire
     controls the NI DAQ card for the purposes of scanning measurements, with data acquisition
 
-    num_queues is the number of Queues that the data is being written into
+
     multiple queues facilitates sending data into multiple places, for example a data
     writing queue, a data analysis queue and a display queue
     The function get_queues returns a list containing all the queues
 
     Data goes into queues as an array with the 1st column being time and the other
-    columns containing voltage values of the channels
+    columns containing voltage values of the channels.
 
-    $x_chan is the channel name for the x-axis (e.g. "ao0")
-    $y_chan is the channel name for the y-axis (e.g. "ao1")
-    $V_s_chan is the channel name for the source (e.g. "ao2")
-    $V_bg_chan is the channel name for the backgate (e.g. "ao3")
-    at the beginning of a scan it synchronizes with the Scanner's own stopwatch
+    CURRENT IMPLEMENTATION is for four voltage channels, may be more extensive in the future.
+    Channels are defined (e.g. 'Dev1/ao0') in the parameters file: CHANNEL_x, CHANNEL_y,
+    CHANNEL_v1, CHANNEL_v2
 
-    Callable Attributes:
-    $nx is the number of x points in the image, by default NUM_x_points
-    $ny is the number of y points in the image, by default NUM_y_points
-    $linerate is the number of lines per second, when scanning
+    Args:
+        num_queues (int) : The number of Queues that the data is being written into.
+
+    Attributes:
+        nx : the number of x points in the image, by default NUM_x_points. READ ONLY
+        ny : the number of y points in the image, by default NUM_y_points. READ ONLY
+        linerate : the number of lines per second, when scanning. READ ONLY
     '''
 
     def __init__(self, num_queues):
@@ -216,7 +217,7 @@ class card_control_acquire():
     def ramp_up(self, X, Y, Vsd, Vbg, t=-1):
         '''
         Ramps from the current value to the desired value for each channel, in the time defined by
-        the parameter $t which if set to -1 is the default CNTL_default_ramp_time
+        the parameter t which if set to -1 is the default CNTL_default_ramp_time
         '''
         if t == -1:
             t = pm.CNTL_default_ramp_time
@@ -333,8 +334,8 @@ class card_control_acquire():
         Scans continuously along a fast axis and in discrete steps along an orthogonal slow axis,
         outputting a scanning waveform along the fast axis.
 
-        $xrange and $yrange are tuples containing (vstart, vend) where the scan is from vstart to
-        vend, $theta the scan angle along the fast and slow axes respectively, if vstart = vend
+        xrange and yrange are tuples containing (vstart, vend) where the scan is from vstart to
+        vend, theta the scan angle along the fast and slow axes respectively, if vstart = vend
         there will be no scan along that axis, instead that axis will stay at a constant value
         given by vstart=vend. Outputs will be zeroed at the end of the scan, unless default value
         is set
@@ -343,14 +344,14 @@ class card_control_acquire():
         value at the physical output, calibration paramters are defined for each channel in the
         parameters file.
 
-        Also scans the input function $func along the slow axis in range $funcrange.
-        If $funcrange is a tuple of length 2 or a numpy array then the input function should be
+        Also scans the input function func along the slow axis in range funcrange.
+        If funcrange is a tuple of length 2 or a numpy array then the input function should be
         callable with a float value that changes some parameter, i.e. func(x).
 
-        $after_vbg if True the backgate will stay constant at the ending value after the scan is
+        after_vbg if True the backgate will stay constant at the ending value after the scan is
         sucessfully Completed, if False it will go to the default value
 
-        $after_vsd if True the backgate will stay constant at the ending value after the scan is
+        after_vsd if True the backgate will stay constant at the ending value after the scan is
         sucessfully Completed, if False it will go to the default value
         '''
         if isinstance(x_range, tuple) and isinstance(y_range, tuple) and isinstance(vsd_range, tuple) and isinstance(vbg_range, tuple):
@@ -593,8 +594,8 @@ class card_control_acquire():
         voltage) constant on each line (i.e. only being slow variables). fast_func will be called
         as the fast axis, if None it will throw an error.
 
-        $xrange and $yrange are tuples containing (vstart, vend) where the scan is from vstart to
-        vend, $theta the scan angle along the fast and slow axes respectively, if vstart = vend
+        xrange and yrange are tuples containing (vstart, vend) where the scan is from vstart to
+        vend, theta the scan angle along the fast and slow axes respectively, if vstart = vend
         there will be no scan along that axis, instead that axis will stay at a constant value
         given by vstart=vend. Outputs will be zeroed at the end of the scan, unless default value
         is set
@@ -603,16 +604,16 @@ class card_control_acquire():
         value at the physical output, calibration paramters are defined for each channel in the
         parameters file.
 
-        Also scans the input function $func along the slow axis in range $funcrange.
-        If $funcrange is a tuple of length 2 or a numpy array then the input function should be
+        Also scans the input function func along the slow axis in range funcrange.
+        If funcrange is a tuple of length 2 or a numpy array then the input function should be
         callable with a float value that changes some parameter, i.e. func(x).
-        If $funcrange is a tuple of length 4 then the input function should be callable with three
+        If funcrange is a tuple of length 4 then the input function should be callable with three
         float inputs, two of which are constant and the third that changes some parameter, i.e. func(funcrange[2], funcrange[3], x).
 
-        $after_vbg if True the backgate will stay constant at the ending value after the scan is
+        after_vbg if True the backgate will stay constant at the ending value after the scan is
         sucessfully Completed, if False it will go to the default value
 
-        $after_vsd if True the backgate will stay constant at the ending value after the scan is
+        after_vsd if True the backgate will stay constant at the ending value after the scan is
         sucessfully Completed, if False it will go to the default value
         '''
         if isinstance(x_range, tuple) and isinstance(y_range, tuple) and isinstance(vsd_range, tuple) and isinstance(vbg_range, tuple):
@@ -800,10 +801,10 @@ class card_control_acquire():
         Computes the waveform needed to scan over 80 percent of the waveform, ramping back
         to the next point over the remaining 20 percent of the waveform
 
-        where $startV and $stopV are the points to ramp between and $nextV is the point to ramp
-        down to after reaching $stopV, all must be floats
+        where startV and stopV are the points to ramp between and nextV is the point to ramp
+        down to after reaching stopV, all must be floats
 
-        $N is the number of points to do it for, must be an integer
+        N is the number of points to do it for, must be an integer
         '''
         d = np.zeros(N)
         turn = int((1.0-self.shift-self.stay)*N)
