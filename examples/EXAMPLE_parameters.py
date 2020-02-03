@@ -5,7 +5,7 @@
 Change based on Calibration Data
 '''
 # Scanning calibration to convert voltage to physical space
-# Usually calibrating scanning galvos mirrors.
+# Usually calibrating scanning galvo mirrors.
 SCAN_units_to_volts = 1.0/1.0 # V/um Conversion factor
 SCAN_units = "Volts" # "Micron"
 

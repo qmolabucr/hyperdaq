@@ -200,9 +200,7 @@ class serial_device_listener(serial_device):
 
 	'''
 	def __init__(self, com_port, sys_time, Baudrate=57600, Parity=serial.PARITY_ODD, Stopbits=serial.STOPBITS_ONE, Bytesize=serial.SEVENBITS, Terminator='\r\n',Timeout=0.05):
-		serial_device.__init__(
-			self, com_port,
-			Baudrate=Baudrate, Parity=Parity, Stopbits=Stopbits, Bytesize=Bytesize, Terminator=Terminator, Timeout=Timeout)
+		serial_device.__init__(self, com_port, Baudrate=Baudrate, Parity=Parity, Stopbits=Stopbits, Bytesize=Bytesize, Terminator=Terminator, Timeout=Timeout)
 		self.timer = sys_time
 		self.queueing = False
 		self.reading = False

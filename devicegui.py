@@ -1,11 +1,9 @@
 '''
-hyperDAQ : Hypercubic Data Aquisition Program
-
 devicegui.py
 
 A module for user interfaces of hardware devices controlled through hyperDAQ
 
-Last Updated: January 2020
+Last Updated: February 2020
 
 |  Trevor Arp
 |  Gabor Lab
@@ -25,16 +23,15 @@ import parameters as pm
 
 class generic_device():
     '''
-    Generic Interface for a hardware device
+    Generic Interface for a hardware device. Inherit and override to customize interface for a
+    device. The update() and log_status() functions should be implemented to update the device
+    status and write that status to a log file, respectively.
 
-    $master is the frame in which to pack it
-
-    $gui is a reference to the broader user interface, used for writing out information
-
-    $controller is the device controller
-
-    $calibration file is the calibration of the device if needed
-
+    Args:
+        master : The frame in which to pack the interface
+        gui : The reference to the broader user interface, used for writing out information
+        controller : The device controller
+        calibration (str, optional): the file is the calibration of the device if needed, need tp implement load_calibraiton function to use
     '''
 
     def __init__(self, master, gui, controller, data_out, calibration_file=None):
@@ -73,6 +70,8 @@ class generic_device():
         '''
         Logs all relevant parameters for a scan
         '''
+        # Log hardware parameters using the following function:
+        # self.data_out.log_param("Parameter Name", param)
         pass
     # end log_status
 

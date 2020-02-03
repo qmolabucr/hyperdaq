@@ -779,7 +779,7 @@ class hyperDAQ():
 
     def start_scan(self):
         '''
-        Finite Scan, gathers the scan parameters from the interface and passes the scan
+        Gathers the scan parameters from the interface and passes the scan
         specification off to the control thread.
         '''
         if self.control.active:

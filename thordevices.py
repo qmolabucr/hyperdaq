@@ -115,6 +115,13 @@ class DelayController():
     #
 
     def MoveToIn(self, position, time):
+        """
+        Move to a position in a given amount of time
+
+        Args:
+            position : the position to move to
+            time : The amount of time to take, must not cause stage to exceed maximum velocity
+        """
         if position >= self.minPos and position <= self.maxPos:
             vel = np.abs(position - self.position)/time
             vel_c = ctypes.c_int(int(vel*self.velocity_to_mm))
