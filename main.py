@@ -560,8 +560,8 @@ class Control_Thread(threading.Thread):
             if not param in [fastvar, slowvar, cubevar]:
                 self.data_out.log_param(pm.SCAN_voltage_lognames[i]+" Channel", str(self.gui.scan_params[param][0]))
                 self.data_out.log_param(pm.SCAN_voltage_lognames[i]+" Units", str(self.gui.scan_params[param][1]))
-                self.data_out.log_param(pm.SCAN_spatial_lognames[i]+" Start", outputs[param][0])
-                self.data_out.log_param(pm.SCAN_spatial_lognames[i]+" End", outputs[param][1])
+                self.data_out.log_param(pm.SCAN_voltage_lognames[i]+" Start", outputs[param][0])
+                self.data_out.log_param(pm.SCAN_voltage_lognames[i]+" End", outputs[param][1])
         #
 
         #Scanning parameters that are always logged
@@ -841,7 +841,7 @@ class hyperDAQ():
         # Check the scan varaible entries and add them to the spec
         try:
             fs, fe = self.fast_axis.get_entries()
-            if fast in pm.SCAN_voltage_parameters:
+            if fast in pm.SCAN_spatial_parameters:
                 x0 = float(self.spatial_output_entries[fast].get())
                 fs = fs + x0
                 fe = fe + x0
@@ -854,14 +854,14 @@ class hyperDAQ():
 
         try:
             ss, se = self.slow_axis.get_entries()
-            if slow in pm.SCAN_voltage_parameters:
+            if slow in pm.SCAN_spatial_parameters:
                 y0 = float(self.spatial_output_entries[slow].get())
                 ss = ss + y0
                 se = se + y0
         except Exception as e:
             self.display_Error('Could not read Slow Axis value')
             return
-        if not self.check_value(slow, ss) or  not self.check_value(slow, se):
+        if not self.check_value(slow, ss) or not self.check_value(slow, se):
             return
         spec.add_axis(axes[1], ss, se, self.scanner.ny)
 
@@ -940,7 +940,9 @@ class hyperDAQ():
         lims = prms[5]
         if key in pm.SCAN_spatial_parameters:
             value = value*pm.SCAN_units_to_volts
-        value = CAL(value, key)
+
+        if key in pm.SCAN_spatial_parameters or key in pm.SCAN_voltage_parameters:
+            value = CAL(value, key)
 
         if value < lims[0]:
             self.display_Error(prms[0]+' real values must be greater than ' + str(lims[0]))
@@ -1616,11 +1618,11 @@ class hyperDAQ():
         except ValueError:
             self.display_Error("Given value is not a float")
             return
-        if float(v) <= pm.RATE_line_scan:
+        if float(v) <= pm.RATE_max_line_scan:
             self.scanner.set_line_rate(v)
             self.linerateTEXT.set(str(self.scanner.linerate))
         else:
-            s = "Cannot set line rate faster than parameter RATE_line_scan=" + str(pm.RATE_line_scan)
+            s = "Cannot set line rate faster than parameter RATE_max_line_scan=" + str(pm.RATE_max_line_scan)
             self.display_Error(s)
     # end set_linerate_callback
 
