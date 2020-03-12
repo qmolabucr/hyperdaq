@@ -317,20 +317,189 @@ class calibrate_power_angle(thor_rotation_stage):
     # end update
 # end calibrate_power_angle
 
-
-class dual_stage_power_control(generic_device):
+class single_stage_power_control(generic_device):
     '''
-    An interface for two rotation stages, with keys 'rot_stage' and 'rot_stage_2', for dual control in
-    pump probe setups
+    An interface for a rotation stage with a single pulsed beam (as opposed to pump probe setups)
+    that works with power in units of %. Assumes an InGaAs detector is used for power measurement.
     '''
-
-    def __init__(self, master, gui, controller, data_out, second_stage='rot_stage_2'):
-        self.ratio = pm.BEAM_default_ratio
+    def __init__(self, master, gui, controller, data_out, laser='opo_control'):
         self.power = 0.0
         self.rawPower = 0.0
         self.percent = pm.DEFAULT_Power_Percent
+        self.laser_key = laser
         generic_device.__init__(self, master, gui, controller, data_out, calibration_file=join('calibration','power'))
+        self.load_beam_calib()
         self.set_power(self.percent)
+    # end init
+
+    def init_interface(self):
+        tk.Label(self.frame, text="").grid(row=0, column=0)
+        tk.Label(self.frame, text="Single Beam Power Controller").place(relx=0.5, y=13, anchor='center')
+        self.powerdisplayFRAME = tk.Frame(self.frame)
+        self.powerTEXT = tk.StringVar()
+        self.powerTEXT.set(str(self.power))
+        self.rawPowerTEXT = tk.StringVar()
+        self.rawPowerTEXT.set(str(self.rawPower))
+        self.percentTEXT = tk.StringVar()
+        self.percentTEXT.set(str(self.percent))
+        tk.Label(self.powerdisplayFRAME, text="Power:").grid(row=0, column=0, sticky=tk.W)
+        tk.Label(self.powerdisplayFRAME, textvariable=self.powerTEXT, anchor=tk.E, width=4).grid(row=0, column=1, sticky=tk.W)
+        tk.Label(self.powerdisplayFRAME, text="mW   Raw:", anchor=tk.W).grid(row=0, column=2, sticky=tk.W)
+        tk.Label(self.powerdisplayFRAME, textvariable=self.rawPowerTEXT, width=4).grid(row=0, column=3, sticky=tk.W)
+        tk.Label(self.powerdisplayFRAME, text="  ").grid(row=0, column=4, sticky=tk.W)
+        tk.Label(self.powerdisplayFRAME, textvariable=self.percentTEXT, width=5, anchor=tk.E).grid(row=0, column=5, sticky=tk.W)
+        tk.Label(self.powerdisplayFRAME, text="%  ").grid(row=0, column=6, sticky=tk.W)
+        self.powerBUTTON = tk.Button(self.powerdisplayFRAME, text="Set Power", command=self.set_power_callback, width=12)
+        self.powerBUTTON.grid(row=0, column=7, sticky=tk.W)
+        self.powerdisplayFRAME.grid(row=1, column=0, sticky=tk.W)
+
+        self.angledisplayFRAME = tk.Frame(self.frame)
+        self.angleTEXT = tk.StringVar()
+        self.angleTEXT.set(str(round(self.controller.angle,1)))
+        tk.Label(self.angledisplayFRAME, text="Rotation Angle: ").grid(row=0, column=0, sticky=tk.W)
+        tk.Label(self.angledisplayFRAME, textvariable=self.angleTEXT, anchor=tk.E, width=5).grid(row=0, column=1, sticky=tk.W)
+        #tk.Label(self.angledisplayFRAME, text=u"\u00b0" +"      ", anchor=tk.W).grid(row=0, column=2, sticky=tk.W)
+        self.angledisplayFRAME.grid(row=2, column=0, sticky=tk.W)
+    # end init_interface
+
+    def update(self):
+        try:
+            self.rawPower = self.gui.auximages['powerimg'].current_val
+            self.power = self.calibrate_power(self.rawPower)
+            self.powerTEXT.set(str(round(self.power, ndigits=2)))
+            self.rawPowerTEXT.set(str(round(self.rawPower, ndigits=3)))
+            self.angleTEXT.set(str(round(self.controller.angle,1)))
+            self.percentTEXT.set(str(round(self.percent,2)))
+        except Exception as e:
+            self.gui.display_Error("could not update power control")
+            print(e)
+            format_exc()
+    # end update
+
+    def log_status(self):
+        try:
+            self.data_out.log_param("Rotation Stage Angle", self.controller.angle)
+            self.data_out.log_param("IR Power", self.power)
+            self.data_out.log_param("Raw Power", self.rawPower)
+            self.data_out.log_param("Percent Power", self.percent)
+            self.data_out.log_param("Power Calibration File", self.power_calibration_file)
+        except Exception as e:
+            self.gui.display_Error("could not log rotation stage position")
+    # end log_status
+
+    def set_power_callback(self):
+        spec = [['Power', '%', str(round(self.percent, 2))]]
+        v = self.gui.popup_entry("Enter Power", spec)
+        try:
+            v = float(v[0])
+        except:
+            self.gui.display_Error('Given Value(s) is not a Float')
+            return
+        if v <= 100.0 and v >= 0.0:
+            self.gui.control_queue.put([self.set_power, [v]])
+        else:
+            s = 'Power percentage must be between 0 and 100'
+            self.gui.display_Error(s)
+    # end set_power_callback
+
+    def set_power(self, p):
+        self.percent = p
+        if p > 0.0 and p <= 100.0:
+            theta = self.percent_beam(p/100.0)
+            if theta > self.beam_theta_max:
+                theta = self.beam_theta_max
+                self.gui.display_Warning('rotation stage maxed out')
+        else:
+            theta = 0.0
+        if theta >= pm.ROTATION_min_angle and theta <= pm.ROTATION_max_angle:
+            self.controller.MoveDeg(theta)
+        else:
+            self.gui.display_Error("Couldn't set rotation stage angle")
+    # end set_power
+
+    def set_angle_callback(self):
+        spec = [['Rotation Stage Angle', 'Degrees', str(round(self.controller.angle, 1))]]
+        v = self.gui.popup_entry("Enter New Angles", spec)
+        try:
+            v = float(v[0])
+        except:
+            self.gui.display_Error('Given Value is not a Float')
+            return
+        if v >= pm.ROTATION_min_angle and v <= pm.ROTATION_max_angle:
+            self.gui.control_queue.put([self.controller.MoveDeg, [v]])
+            self.gui.display_Text('Setting Rotation Stage Angle to ' + str(round(v,1)))
+        else:
+            s = 'position must be between '+str(pm.ROTATION_min_angle)+" and "+str(pm.ROTATION_max_angle)+" degrees"
+            self.gui.display_Error(s)
+    # end set_angle_callback
+
+    def load_beam_calib(self):
+        # Beam Power Curves
+        ref = np.loadtxt(join(pm.CAL_beam_dir, pm.BEAM_power_curve))
+        self.percent_beam = interp1d(ref[:,0]/np.max(ref[:,0]), ref[:,1], bounds_error=False, fill_value='extrapolate')
+        self.beam_theta_max = np.max(ref[:,1])
+    # end load_beam_calib
+
+    def load_calibration(self):
+        # InGaAs calibration
+        self.calibration_file = pm.CAL_power_dir
+        self.InGaAs_calibration_file = join(pm.CAL_ingaas_dir,'InGaAs_responsivity.txt')
+        files = listdir(self.calibration_file)
+        rundate = date.today()
+        lastdate = date(2014,1,1)
+        for f in files:
+            if f.split('.')[1] == 'txt':
+                s = f.split('_')
+                fdate = date(int(s[0]), int(s[1]), int(s[2]))
+                if rundate >= fdate and fdate >= lastdate:
+                    calib_file = f
+                    lastdate = fdate
+        self.power_calibration_file = join(self.calibration_file, calib_file)
+        d = np.loadtxt(self.power_calibration_file)
+        self.pfit = np.polyfit(d[:,1], d[:,0], 1)
+        self.InGaAs_response = np.loadtxt(self.InGaAs_calibration_file)
+        self.resp1250 = self.calibrate_responsivity(1250.0)
+    # end load_calibration
+
+    def calibrate_responsivity(self, wav):
+        c = self.InGaAs_response
+        rows, cols = np.shape(c)
+        if wav not in c[:,0]:
+            ix = np.searchsorted(c[:,0], wav)
+            if ix < 2:
+                resp = np.interp(wav, c[0:4,0], c[0:4,1])
+            elif ix > rows-2:
+                resp = np.interp(wav, c[rows-4:rows,0], c[rows-4:rows,1])
+            else:
+                resp = np.interp(wav, c[ix-2:ix+2,0], c[ix-2:ix+2,1])
+        else:
+            i = int(np.argwhere(c[:,0]==wav))
+            resp = c[i,1]
+        return float(resp)
+    # end calibrate_responsivity
+
+    def calibrate_power(self, data):
+        try:
+            wav = float(self.gui.device_dict[self.laser_key].wavelength)
+        except Exception as e:
+            wav = 1200.0
+        if wav < 800.0:
+            wav = 1200.0
+        resp = self.calibrate_responsivity(wav)
+        rawP = data*(self.resp1250/resp)
+        return self.pfit[0]*rawP + self.pfit[1]
+    # end calibrate_power
+#
+
+class dual_stage_power_control(single_stage_power_control):
+    '''
+    An interface for two rotation stages, with a thordevices.DualRotationController, for dual control in
+    pump probe setups. Assumes an InGaAs detector is used for power measurement.
+    '''
+
+    def __init__(self, master, gui, controller, data_out, laser='opo_control'):
+        self.ratio = pm.BEAM_default_ratio
+        single_stage_power_control.__init__(self, master, gui, controller, data_out, laser=laser)
     # end init
 
     def init_interface(self):
@@ -364,8 +533,6 @@ class dual_stage_power_control(generic_device):
         tk.Label(self.angledisplayFRAME, text=u"\u00b0"+"     Reference:", anchor=tk.W).grid(row=0, column=2, sticky=tk.W)
         tk.Label(self.angledisplayFRAME, textvariable=self.anglerefTEXT, anchor=tk.E, width=5).grid(row=0, column=3, sticky=tk.W)
         tk.Label(self.angledisplayFRAME, text=u"\u00b0" +"      ", anchor=tk.W).grid(row=0, column=4, sticky=tk.W)
-        # self.angleBUTTON = tk.Button(self.angledisplayFRAME, text="Set Angles", command=self.set_angle_callback, width=12)
-        # self.angleBUTTON.grid(row=0, column=5, sticky=tk.W)
         self.angledisplayFRAME.grid(row=2, column=0, sticky=tk.W)
 
         self.balanceRatioFRAME = tk.Frame(self.frame)
@@ -445,21 +612,6 @@ class dual_stage_power_control(generic_device):
             self.gui.display_Error(s)
     # end set_angle_callback
 
-    def set_power_callback(self):
-        spec = [['Power', '%', str(round(self.percent, 2))]]
-        v = self.gui.popup_entry("Enter Power", spec)
-        try:
-            v = float(v[0])
-        except:
-            self.gui.display_Error('Given Value(s) is not a Float')
-            return
-        if v <= 100.0 and v >= 0.0:
-            self.gui.control_queue.put([self.set_power, [v]])
-        else:
-            s = 'Power percentage must be between 0 and 100'
-            self.gui.display_Error(s)
-    # end set_angle_callback
-
     def set_ratio_callback(self):
         spec = [['Beam Ratio', '', str(round(self.ratio, 2))]]
         v = self.gui.popup_entry("Enter New Ratio", spec)
@@ -479,26 +631,7 @@ class dual_stage_power_control(generic_device):
             self.gui.display_Error(s)
     # end dual_stage_power_control
 
-    def load_calibration(self):
-        # InGaAs calibration
-        self.calibration_file = pm.CAL_power_dir
-        self.InGaAs_calibration_file = join(pm.CAL_ingaas_dir,'InGaAs_responsivity.txt')
-        files = listdir(self.calibration_file)
-        rundate = date.today()
-        lastdate = date(2014,1,1)
-        for f in files:
-            if f.split('.')[1] == 'txt':
-                s = f.split('_')
-                fdate = date(int(s[0]), int(s[1]), int(s[2]))
-                if rundate >= fdate and fdate >= lastdate:
-                    calib_file = f
-                    lastdate = fdate
-        self.power_calibration_file = join(self.calibration_file, calib_file)
-        d = np.loadtxt(self.power_calibration_file)
-        self.pfit = np.polyfit(d[:,1], d[:,0], 1)
-        self.InGaAs_response = np.loadtxt(self.InGaAs_calibration_file)
-        self.resp1250 = self.calibrate_responsivity(1250.0)
-
+    def load_beam_calib(self):
         # Beam Power Curves
         delay = np.loadtxt(join(pm.CAL_beam_dir, pm.DELAY_power_curve))
         ref = np.loadtxt(join(pm.CAL_beam_dir, pm.REF_power_curve))
@@ -507,36 +640,7 @@ class dual_stage_power_control(generic_device):
         self.percent_ref = interp1d(ref[:,0]/np.max(ref[:,0]), ref[:,1], bounds_error=False, fill_value='extrapolate')
         self.del_theta_max = np.max(delay[:,1])
         self.ref_theta_max = np.max(ref[:,1])
-    # end load_calibration
-
-    def calibrate_responsivity(self, wav):
-        c = self.InGaAs_response
-        rows, cols = np.shape(c)
-        if wav not in c[:,0]:
-            ix = np.searchsorted(c[:,0], wav)
-            if ix < 2:
-                resp = np.interp(wav, c[0:4,0], c[0:4,1])
-            elif ix > rows-2:
-                resp = np.interp(wav, c[rows-4:rows,0], c[rows-4:rows,1])
-            else:
-                resp = np.interp(wav, c[ix-2:ix+2,0], c[ix-2:ix+2,1])
-        else:
-            i = int(np.argwhere(c[:,0]==wav))
-            resp = c[i,1]
-        return float(resp)
-    # end calibrate_responsivity
-
-    def calibrate_power(self, data):
-        try:
-            wav = float(self.gui.device_dict['opo_control'].wavelength)
-        except Exception as e:
-            wav = 1200.0
-        if wav < 800.0:
-            wav = 1200.0
-        resp = self.calibrate_responsivity(wav)
-        rawP = data*(self.resp1250/resp)
-        return self.pfit[0]*rawP + self.pfit[1]
-    # end calibrate_power
+    # end load_beam_calib
 # dual_stage_power_control
 
 class oop_angle_stage(thor_rotation_stage):
